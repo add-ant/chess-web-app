@@ -40,7 +40,7 @@ public class Square {
         return color;
     }
 
-    boolean isEmpty(){
+    public boolean isEmpty(){
         return piece == null;
     }
 
@@ -76,5 +76,10 @@ public class Square {
         return Optional.empty();
     }
 
-
+    /**
+     * Frees this square making it empty.
+     */
+    public void free(){
+        piece = null;
+    }
 }

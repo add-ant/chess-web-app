@@ -17,6 +17,25 @@ public class Chessboard {
     private final Square[][] chessboard = new Square[8][8];
 
     public Chessboard() {
+        createChessboard();
+    }
 
+    private void createChessboard() {
+        Color current = Color.BLACK;
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                chessboard[i][j] = new Square(i, j, current);
+                if (j != 7)
+                    current = current.swap();
+            }
+        }
+    }
+
+    public Square[][] getChessboard() {
+        return chessboard;
+    }
+
+    public Square getSquareAt(int row, int column){
+        return chessboard[row][column];
     }
 }
