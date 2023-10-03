@@ -36,18 +36,27 @@ public class ChessboardTest {
     }
 
     @Test
-    public void shouldEvolveCorrectly(){
+    public void squareForGivenPieceShouldBeCorrect(){
         Piece pawn = new Piece(1, PieceType.PAWN, Color.WHITE);
-        Square origin = chessboard.getSquareAt(0, 1);
-        Square target = chessboard.getSquareAt(0, 2);
-        origin.occupyWith(pawn);
+        chessboard.getSquareAt(5, 5).occupyWith(pawn);
 
-        assertFalse(chessboard.getSquareAt(0, 1).isEmpty());
+        assertEquals(chessboard.getSquareAt(5, 5), chessboard.getSquareFor(pawn));
+    }
 
-        Move move = new Move(origin, target, pawn, MoveEffect.MOVE);
-        chessboard.evolve(move);
+    @Test
+    public void shouldReturnCorrectListOfEmptySquares(){
+        Piece pawn = new Piece(1, PieceType.PAWN, Color.WHITE);
+        chessboard.getSquareAt(5, 5).occupyWith(pawn);
+        chessboard.getSquareAt(5, 6).occupyWith(pawn);
 
-        assertTrue(chessboard.getSquareAt(0, 1).isEmpty());
-        assertFalse(chessboard.getSquareAt(0, 2).isEmpty());
+        assertEquals(4, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(0, 5), Direction.UP).size());
+        assertEquals(1, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(7, 6), Direction.DOWN).size());
+        assertEquals(7, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(1, 7), Direction.LEFT).size());
+        assertEquals(4, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(5, 0), Direction.RIGTH).size());
+        assertEquals(4, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(0, 0), Direction.UPRIGTH).size());
+        assertEquals(1, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(7, 7), Direction.DOWNLEFT).size());
+        assertEquals(1, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(7, 3), Direction.DOWNRIGTH).size());
+        assertEquals(1, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(3, 7), Direction.UPLEFT).size());
+
     }
 }

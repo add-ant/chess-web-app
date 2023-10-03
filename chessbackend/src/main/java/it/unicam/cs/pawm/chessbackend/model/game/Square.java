@@ -82,4 +82,26 @@ public class Square {
     public void free(){
         piece = null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Square square = (Square) o;
+        return row == square.row && column == square.column && color == square.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, column, color);
+    }
+
+    @Override
+    public String toString() {
+        return "Square{" +
+            "row=" + row +
+            ", column=" + column +
+            ", piece=" + piece +
+            '}';
+    }
 }

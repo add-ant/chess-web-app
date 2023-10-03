@@ -12,12 +12,25 @@ public class Piece {
     private final PieceType pieceType;
     private final Color color;
     private PieceState state;
+    private boolean moved;
 
     public Piece(int id, PieceType pieceType, Color color) {
         this.id = id;
         this.pieceType = pieceType;
         this.color = color;
         this.state = PieceState.ALIVE;
+    }
+
+    public void setState(PieceState state) {
+        this.state = state;
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public void setMoved(){
+        moved = true;
     }
 
     public int getId() {

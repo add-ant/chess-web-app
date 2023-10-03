@@ -5,20 +5,18 @@ import java.util.Objects;
 /**
  * This class represents a move in the chess game.
  *
- * A move is a shift of a game piece from the squares that is currently occupying and the target
+ * A move is a shift of a game piece from the square that it is currently occupying and the target
  * square that it wants to reach.
  */
 public class Move {
     private final Square origin;
     private final Square target;
     private final Piece piece;
-    private final MoveEffect effect;
 
-    public Move(Square origin, Square target, Piece piece, MoveEffect effect) {
+    public Move(Square origin, Square target) {
         this.origin = origin;
         this.target = target;
-        this.piece = piece;
-        this.effect = effect;
+        this.piece = origin.getPiece().orElseThrow();
     }
 
     public Square getOrigin() {
@@ -33,30 +31,16 @@ public class Move {
         return piece;
     }
 
-    public MoveEffect getEffect() {
-        return effect;
-    }
-
-    /**
-     * Transfers the moving piece to the target square, if the move is not illegal.
-     */
-    public void perform(){
-        if(!effect.equals(MoveEffect.ILLEGAL)){
-            target.occupyWith(piece);
-            origin.free();
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Move move = (Move) o;
-        return Objects.equals(origin, move.origin) && Objects.equals(target, move.target) && Objects.equals(piece, move.piece) && effect == move.effect;
+        return Objects.equals(origin, move.origin) && Objects.equals(target, move.target) && Objects.equals(piece, move.piece);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(origin, target, piece, effect);
+        return Objects.hash(origin, target, piece);
     }
 }
