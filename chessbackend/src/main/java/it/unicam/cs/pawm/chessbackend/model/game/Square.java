@@ -51,7 +51,7 @@ public class Square {
      * @return the piece currently occupying this square, if the square is not empty, otherwise
      *         an empty optional.
      */
-    Optional<Piece> getPiece(){
+    public Optional<Piece> getPiece(){
         if (isEmpty())
             return Optional.empty();
         return Optional.of(piece);
@@ -66,7 +66,7 @@ public class Square {
      * @return the piece previously occupying this square (if the square was occupied before
      *         this operation).
      */
-    Optional<Piece> occupyWith(Piece piece){
+    public Optional<Piece> occupyWith(Piece piece){
         if (getPiece().isPresent()){
             Piece previous = getPiece().get();
             this.piece = Objects.requireNonNull(piece);

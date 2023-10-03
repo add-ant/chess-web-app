@@ -1,5 +1,8 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a chessboard. It consists of a set of 64 squares organized in rows and
  * columns.
@@ -37,5 +40,13 @@ public class Chessboard {
 
     public Square getSquareAt(int row, int column){
         return chessboard[row][column];
+    }
+
+    /**
+     * Evolves after a move.
+     * @param move the move made.
+     */
+    public void evolve(Move move){
+        move.perform();
     }
 }

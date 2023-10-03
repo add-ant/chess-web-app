@@ -7,15 +7,15 @@ import java.util.Objects;
  *
  * A chess piece has a color and a state that tells if the piece is alive or dead.
  */
-public abstract class Piece {
+public class Piece {
     private final int id;
-    private final String name;
+    private final PieceType pieceType;
     private final Color color;
     private PieceState state;
 
-    protected Piece(int id, String name, Color color) {
+    public Piece(int id, PieceType pieceType, Color color) {
         this.id = id;
-        this.name = name;
+        this.pieceType = pieceType;
         this.color = color;
         this.state = PieceState.ALIVE;
     }
@@ -24,8 +24,8 @@ public abstract class Piece {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public PieceType getPieceType() {
+        return pieceType;
     }
 
     public Color getColor() {
