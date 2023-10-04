@@ -153,4 +153,19 @@ public class TargetsCalculatorTest {
 
         assertEquals(7, calculator.computePossibleTargets(blackKnight).size());
     }
+
+    @Test
+    public void kingShouldHaveCorrectNumberOfTargets(){
+        Piece king = new Piece(1, PieceType.KING, Color.WHITE);
+        Piece bishop = new Piece(2, PieceType.BISHOP, Color.WHITE);
+
+        chessboard.getSquareAt(0, 4).occupyWith(king);
+        chessboard.getSquareAt(0, 5).occupyWith(bishop);
+
+        assertEquals(4, calculator.computePossibleTargets(king).size());
+
+        chessboard.getSquareAt(0, 5).free();
+
+        assertEquals(5, calculator.computePossibleTargets(king).size());
+    }
 }

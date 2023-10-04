@@ -22,8 +22,23 @@ public class TargetsCalculator {
             case BISHOP -> computeBishopTargets(piece, origin);
             case KNIGHT -> computeKnightTargets(piece, origin);
             case QUEEN -> computeQueenTargets(piece, origin);
-            case KING -> null;
+            case KING -> computeKingTargets(piece, origin);
         };
+    }
+
+    private Set<Square> computeKingTargets(Piece piece, Square origin) {
+        return Arrays.stream(Direction.values())
+                    .map(d -> chessboard.getSquareFrom(origin, d))
+                        .filter(Optional::isPresent)
+                            .map(Optional::get)
+                                .filter(
+                                    s -> s.isEmpty() ||
+                                        (
+                                            s.getPiece().isPresent() &&
+                                                !s.getPiece().get().getColor().equals(piece.getColor())
+                                        )
+                                )
+                                    .collect(Collectors.toSet());
     }
 
     private Set<Square> computeKnightTargets(Piece piece, Square origin) {
@@ -44,7 +59,8 @@ public class TargetsCalculator {
                             .filter(
                                 s -> s.isEmpty() ||
                                     (s.getPiece().isPresent() &&
-                                        !s.getPiece().get().getColor().equals(piece.getColor()))
+                                        !s.getPiece().get().getColor().equals(piece.getColor())
+                                    )
                             )
                                     .collect(Collectors.toSet());
     }
