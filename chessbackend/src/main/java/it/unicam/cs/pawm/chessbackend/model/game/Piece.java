@@ -25,7 +25,7 @@ public class Piece {
         this.state = state;
     }
 
-    public boolean isMoved() {
+    public boolean hasMoved() {
         return moved;
     }
 

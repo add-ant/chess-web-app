@@ -23,7 +23,7 @@ public class Evaluator implements MoveEvaluator{
                 case PAWN -> null;
                 case ROOK -> null;
                 case BISHOP -> null;
-                case KNIGTH -> null;
+                case KNIGHT -> null;
                 case QUEEN -> null;
                 case KING -> null;
             };

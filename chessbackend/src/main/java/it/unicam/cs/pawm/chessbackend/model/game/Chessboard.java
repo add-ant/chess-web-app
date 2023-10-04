@@ -75,7 +75,7 @@ public class Chessboard {
      * @param direction the direction.
      * @return the adjacent square to the origin in that direction (if exists).
      */
-    private Optional<Square> getSquareFrom(Square origin, Direction direction){
+    public Optional<Square> getSquareFrom(Square origin, Direction direction){
         return switch (direction){
             case UP -> getUpSquare(origin);
             case DOWN -> getDownSquare(origin);
@@ -86,6 +86,30 @@ public class Chessboard {
             case DOWNRIGTH -> getDownRightSquare(origin);
             case DOWNLEFT -> getDownLeftSquare(origin);
         };
+    }
+
+    public Optional<Square> getSquareFrom(Square origin, Direction firstDirection, Direction secondDirection,
+                                          int firstDistance, int secondDistance){
+        Optional<Square> intermediate = Optional.of(origin);
+        Optional<Square> toFound = Optional.empty();
+        int firstCount = 0;
+        int secondCount = 0;
+
+        while (firstCount < firstDistance){
+            if (intermediate.isPresent()){
+                intermediate = getSquareFrom(intermediate.get(), firstDirection);
+                firstCount++;
+            } else
+                break;
+        }
+
+        if (intermediate.isPresent()){
+            while (secondCount < secondDistance){
+                toFound = getSquareFrom(intermediate.get(), secondDirection);
+                secondCount++;
+            }
+        }
+        return toFound;
     }
 
     private Optional<Square> getDownLeftSquare(Square origin) {

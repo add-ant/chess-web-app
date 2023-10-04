@@ -59,4 +59,15 @@ public class ChessboardTest {
         assertEquals(1, chessboard.getEmptySquaresFrom(chessboard.getSquareAt(3, 7), Direction.UPLEFT).size());
 
     }
+
+    @Test
+    public void shouldReturnCorrectSquares(){
+        Square origin = chessboard.getSquareAt(0,0);
+
+        assertTrue(chessboard.getSquareFrom(origin, Direction.UP, Direction.RIGTH, 2, 1).isPresent());
+        assertTrue(chessboard.getSquareFrom(origin, Direction.RIGTH, Direction.UP, 2, 1).isPresent());
+        assertFalse(chessboard.getSquareFrom(origin, Direction.UP, Direction.LEFT, 2, 1).isPresent());
+
+        System.out.println(chessboard.getSquareFrom(origin, Direction.UP, Direction.RIGTH, 2, 1));
+    }
 }
