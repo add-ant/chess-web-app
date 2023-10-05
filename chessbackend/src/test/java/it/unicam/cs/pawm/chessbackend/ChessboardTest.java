@@ -2,6 +2,7 @@ package it.unicam.cs.pawm.chessbackend;
 
 import it.unicam.cs.pawm.chessbackend.model.game.*;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +12,11 @@ public class ChessboardTest {
 
     @BeforeAll
     static void chessboardConstruction(){
+        chessboard = new Chessboard();
+    }
+
+    @BeforeEach
+    public void reset(){
         chessboard = new Chessboard();
     }
 

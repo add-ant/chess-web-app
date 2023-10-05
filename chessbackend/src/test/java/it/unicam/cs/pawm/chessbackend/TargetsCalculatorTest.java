@@ -1,10 +1,12 @@
 package it.unicam.cs.pawm.chessbackend;
 
 import it.unicam.cs.pawm.chessbackend.model.game.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TargetsCalculatorTest {
     private static Chessboard chessboard;
@@ -12,6 +14,12 @@ public class TargetsCalculatorTest {
 
     @BeforeAll
     public static void initialize(){
+        chessboard = new Chessboard();
+        calculator = new TargetsCalculator(chessboard);
+    }
+
+    @AfterEach
+    public void reset(){
         chessboard = new Chessboard();
         calculator = new TargetsCalculator(chessboard);
     }
@@ -158,6 +166,9 @@ public class TargetsCalculatorTest {
     public void kingShouldHaveCorrectNumberOfTargets(){
         Piece king = new Piece(1, PieceType.KING, Color.WHITE);
         Piece bishop = new Piece(2, PieceType.BISHOP, Color.WHITE);
+        Piece queen = new Piece(3, PieceType.QUEEN, Color.BLACK);
+        Piece rook = new Piece(4, PieceType.ROOK, Color.BLACK);
+        Piece pawn = new Piece(5, PieceType.PAWN, Color.BLACK);
 
         chessboard.getSquareAt(0, 4).occupyWith(king);
         chessboard.getSquareAt(0, 5).occupyWith(bishop);
@@ -167,5 +178,19 @@ public class TargetsCalculatorTest {
         chessboard.getSquareAt(0, 5).free();
 
         assertEquals(5, calculator.computePossibleTargets(king).size());
+
+        chessboard.getSquareAt(0, 5).occupyWith(queen);
+
+        assertEquals(16, calculator.computePossibleTargets(queen).size());
+        assertEquals(2, calculator.computePossibleTargets(king).size());
+
+        chessboard.getSquareAt(5, 5).occupyWith(rook);
+
+        assertEquals(1, calculator.computePossibleTargets(king).size());
+
+        chessboard.getSquareAt(2, 2).occupyWith(pawn);
+
+        assertEquals(0, calculator.computePossibleTargets(king).size());
+        assertFalse(calculator.canMove(king));
     }
 }
