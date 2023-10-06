@@ -1,8 +1,6 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * This class represents a chessboard. It consists of a set of 64 squares organized in rows and
@@ -67,6 +65,37 @@ public class Chessboard {
         return emptySquares;
     }
 
+    /**
+     * Returns all the pieces of a given color that are present in the chessboard.
+     *
+     * @param color the color of the pieces to get.
+     * @return all the pieces of a given color that are present in the chessboard.
+     */
+    public Set<Piece> getPiecesOfColor(Color color){
+        Set<Piece> pieces = new HashSet<>();
+
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                Square current = getSquareAt(i, j);
+                if (current.getPiece().isPresent() && current.getPiece().get().getColor().equals(color))
+                    pieces.add(current.getPiece().get());
+            }
+        }
+        return pieces;
+    }
+
+    Optional<Piece> getPiece(PieceType type, Color color){
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; i < 8; j++){
+                Square current = getSquareAt(i, j);
+                if (current.getPiece().isPresent()){
+                    if (current.getPiece().get().getColor().equals(color) && current.getPiece().get().getPieceType().equals(type))
+                        return current.getPiece();
+                }
+            }
+        }
+        return Optional.empty();
+    }
 
     /**
      * Given a direction, returns the adjacent square to the origin square passed in that direction.

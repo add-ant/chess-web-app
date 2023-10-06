@@ -3,7 +3,6 @@ package it.unicam.cs.pawm.chessbackend;
 import it.unicam.cs.pawm.chessbackend.model.game.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -192,5 +191,38 @@ public class TargetsCalculatorTest {
 
         assertEquals(0, calculator.computePossibleTargets(king).size());
         assertFalse(calculator.canMove(king));
+    }
+
+    @Test
+    public void pieceShouldBePinned(){
+        Piece king = new Piece(1, PieceType.KING, Color.WHITE);
+        Piece rook = new Piece(2, PieceType.ROOK, Color.BLACK);
+        Piece knight = new Piece(3, PieceType.KNIGHT, Color.WHITE);
+
+        chessboard.getSquareAt(0, 4).occupyWith(king);
+        chessboard.getSquareAt(2, 4).occupyWith(knight);
+        chessboard.getSquareAt(7, 4).occupyWith(rook);
+
+        assertTrue(calculator.isPinned(knight));
+        assertFalse(calculator.isPinned(rook));
+        assertFalse(calculator.isPinned(king));
+
+        Piece bishop = new Piece(4, PieceType.BISHOP, Color.BLACK);
+        Piece pawn = new Piece(5, PieceType.PAWN, Color.WHITE);
+
+        chessboard.getSquareAt(1, 3).occupyWith(pawn);
+        chessboard.getSquareAt(4, 0).occupyWith(bishop);
+
+        assertTrue(calculator.isPinned(pawn));
+        assertFalse(calculator.isPinned(bishop));
+
+        Piece queen = new Piece(6, PieceType.QUEEN, Color.BLACK);
+        Piece pawn2 = new Piece(7, PieceType.PAWN, Color.WHITE);
+
+        chessboard.getSquareAt(0, 5).occupyWith(pawn2);
+        chessboard.getSquareAt(0, 7).occupyWith(queen);
+
+        assertTrue(calculator.isPinned(pawn2));
+        assertFalse(calculator.isPinned(queen));
     }
 }

@@ -127,6 +127,9 @@ public class TargetsCalculator {
      */
     public Set<Square> computePossibleTargets(Piece piece) {
         Square origin = chessboard.getSquareFor(piece);
+        if (isPinned(piece))
+            return Collections.emptySet();
+
         return switch (piece.getPieceType()) {
             case PAWN -> computePawnTargets(piece, origin);
             case ROOK -> computeRookTargets(piece, origin);
@@ -149,24 +152,75 @@ public class TargetsCalculator {
         return computePossibleTargets(piece).size() != 0;
     }
 
-    /**
-     * Returns all the pieces of a given color that are present in the chessboard.
-     *
-     * @param color the color of the pieces to get.
-     * @return all the pieces of a given color that are present in the chessboard.
-     */
-    public Set<Piece> getPiecesOfColor(Color color){
-        Set<Piece> pieces = new HashSet<>();
+    public Set<Piece> getPinnedPiecesBy(Piece piece){
+        return switch (piece.getPieceType()){
+            case QUEEN -> checkPinnedByQueen(piece);
+            case BISHOP -> checkPinnedByBishop(piece);
+            case ROOK -> checkPinnedByRook(piece);
+            default -> throw new IllegalStateException("Unexpected value: " + piece.getPieceType());
+        };
+    }
 
-        for (int i = 0; i < 8; i++){
-            for (int j = 0; j < 8; j++){
-                Square current = chessboard.getSquareAt(i, j);
-                if (current.getPiece().isPresent() && current.getPiece().get().getColor().equals(color))
-                    pieces.add(current.getPiece().get());
+    private Set<Piece> checkPinnedByRook(Piece piece) {
+        return Arrays.stream(Direction.values())
+            .filter(d -> !d.isDiagonal())
+                .map(d -> getPinnedPieceOnDirection(piece, d))
+                    .filter(Optional::isPresent)
+                        .map(Optional::get)
+                            .collect(Collectors.toSet());
+    }
+
+    private Set<Piece> checkPinnedByBishop(Piece piece) {
+        return Arrays.stream(Direction.values())
+            .filter(Direction::isDiagonal)
+                .map(d -> getPinnedPieceOnDirection(piece, d))
+                    .filter(Optional::isPresent)
+                        .map(Optional::get)
+                            .collect(Collectors.toSet());
+    }
+
+    private Set<Piece> checkPinnedByQueen(Piece piece) {
+        return Arrays.stream(Direction.values())
+            .map(d -> getPinnedPieceOnDirection(piece, d))
+                .filter(Optional::isPresent)
+                    .map(Optional::get)
+                        .collect(Collectors.toSet());
+    }
+
+    private Optional<Piece> getPinnedPieceOnDirection(Piece piece, Direction direction){
+        Square origin = chessboard.getSquareFor(piece);
+        Optional<Square> current = chessboard.getSquareFrom(origin, direction);
+        List<Piece> pieces = new ArrayList<>();
+
+        while (current.isPresent()){
+            if (current.get().getPiece().isPresent()){
+                if (!current.get().getPiece().get().getColor().equals(piece.getColor())){
+                    pieces.add(current.get().getPiece().get());
+                    current = chessboard.getSquareFrom(current.get(), direction);
+                } else
+                    break;
+            } else {
+                current = chessboard.getSquareFrom(current.get(), direction);
             }
         }
-        return pieces;
+        if (pieces.size() >= 2 && pieces.get(1).getPieceType().equals(PieceType.KING))
+            return Optional.of(pieces.get(0));
+        return Optional.empty();
     }
+
+    public boolean isPinned(Piece piece){
+        if (piece.getPieceType().equals(PieceType.KING))
+            return false;
+
+        return chessboard.getPiecesOfColor(piece.getColor().swap()).stream()
+            .filter(
+                p -> p.getPieceType().equals(PieceType.BISHOP)
+                    || p.getPieceType().equals(PieceType.QUEEN) || p.getPieceType().equals(PieceType.ROOK)
+            ).map(this::getPinnedPiecesBy)
+                .flatMap(Set::stream)
+                    .anyMatch(p -> p.equals(piece));
+    }
+
 
     /**
      * Computes the set of all possible targets of all the pieces of a given color.
@@ -175,7 +229,7 @@ public class TargetsCalculator {
      * @return the set of all possible targets of all the pieces of a given color.
      */
     public Set<Square> targetsOfPiecesOfColor(Color color){
-        Set<Piece> pieces = getPiecesOfColor(color);
+        Set<Piece> pieces = chessboard.getPiecesOfColor(color);
 
         return pieces.stream()
             .map(this::computePossibleTargets)
@@ -184,7 +238,7 @@ public class TargetsCalculator {
     }
 
     public Set<Square> defendedSquaresForPiecesOf(Color color){
-        Set<Piece> pieces = getPiecesOfColor(color);
+        Set<Piece> pieces = chessboard.getPiecesOfColor(color);
 
         return pieces.stream()
                 .map(this::defendedSquares)
@@ -234,6 +288,7 @@ public class TargetsCalculator {
     }
 
     private Set<Square> computeQueenTargets(Piece piece, Square origin) {
+
         return Arrays.stream(Direction.values())
                     .map(d -> moveTargets(piece, origin, d))
                         .flatMap(Set::stream)
