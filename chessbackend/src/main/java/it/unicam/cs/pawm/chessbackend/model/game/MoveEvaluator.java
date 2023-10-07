@@ -1,5 +1,7 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
+import java.util.List;
+
 /**
  * A move evaluator is responsible to verify the effect of a specific move.
  */

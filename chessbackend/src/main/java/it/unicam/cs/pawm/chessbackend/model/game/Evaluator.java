@@ -1,52 +1,45 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
-import java.util.Objects;
+import java.util.Set;
 
 /**
  * This class is responsible for the evaluation of chess moves during a game.
  */
 public class Evaluator implements MoveEvaluator{
-    private final Chessboard board;
+    private final TargetsCalculator calculator;
 
     public Evaluator(Chessboard board) {
-        this.board = Objects.requireNonNull(board);
+        this.calculator = new TargetsCalculator(board);
+    }
+
+    public TargetsCalculator getCalculator() {
+        return calculator;
     }
 
     @Override
     public MoveEffect evaluate(Move move) {
-        Square origin = move.getOrigin();
-        Square target = move.getTarget();
-        Piece piece = move.getPiece();
-
-        if(isValidTarget(piece, target)){
-            return switch (piece.getPieceType()){
-                case PAWN -> null;
-                case ROOK -> null;
-                case BISHOP -> null;
-                case KNIGHT -> null;
-                case QUEEN -> null;
-                case KING -> null;
-            };
+        Piece pieceToMove = move.getPiece();
+        Set<Piece> enemies = calculator.getChessboard().getPiecesOfColor(pieceToMove.getColor().swap());
+        Piece enemyKing = enemies.stream()
+            .filter(p -> p.getPieceType().equals(PieceType.KING))
+            .findFirst()
+            .orElseThrow();
+        if (calculator.computePossibleTargets(pieceToMove).contains(move.getTarget())) {
+            boolean isTargetEmptyBeforeMove = calculator.getChessboard().getSquareAt(move.getTarget().getRow(),
+                move.getTarget().getColumn()).isEmpty();
+            calculator.getChessboard().evolve(move);
+            if (calculator.getCheckingPieces(enemyKing).contains(pieceToMove)) {
+                if (enemies.stream().noneMatch(calculator::canMove))
+                    return MoveEffect.CHECKMATE;
+                else return MoveEffect.CHECK;
+            } else if (isTargetEmptyBeforeMove) {
+                return MoveEffect.MOVE;
+            } else {
+                return MoveEffect.CAPTURE;
+            }
         }
         return MoveEffect.ILLEGAL;
     }
-
-    /**
-     * Checks if the target square is occupied by some piece of the same color of the piece to
-     * move to that square.
-     *
-     * @param piece the piece to move.
-     * @param target the target square.
-     * @return true if the target is empty or occupied by a piece of different color, false otherwise.
-     */
-    private boolean isValidTarget(Piece piece, Square target) {
-        if (target.getPiece().isPresent()){
-            return !piece.getColor().equals(target.getPiece().get().getColor());
-        }
-        return true;
-    }
-
-
 
 
 }

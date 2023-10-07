@@ -41,6 +41,10 @@ public class Chessboard {
         return chessboard[row][column];
     }
 
+    public void evolve(Move move){
+        move.perform();
+    }
+
     public Square getSquareFor(Piece piece){
         Square toReturn = null;
         for (int i = 0; i < 8; i++){
@@ -85,9 +89,10 @@ public class Chessboard {
     }
 
     Optional<Piece> getPiece(PieceType type, Color color){
-        for (int i = 0; i < 8; i++){
-            for (int j = 0; i < 8; j++){
-                Square current = getSquareAt(i, j);
+
+        for (int k = 0; k < 8; k++){
+            for (int j = 0; j < 8; j++){
+                Square current = getSquareAt(k, j);
                 if (current.getPiece().isPresent()){
                     if (current.getPiece().get().getColor().equals(color) && current.getPiece().get().getPieceType().equals(type))
                         return current.getPiece();

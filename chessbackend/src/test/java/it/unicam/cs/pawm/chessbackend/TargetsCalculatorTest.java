@@ -225,4 +225,31 @@ public class TargetsCalculatorTest {
         assertTrue(calculator.isPinned(pawn2));
         assertFalse(calculator.isPinned(queen));
     }
+
+    @Test
+    public void shouldHaveCorrectTargetAfterCheck(){
+        Piece king = new Piece(1, PieceType.KING, Color.WHITE);
+        Piece rook = new Piece(2, PieceType.ROOK, Color.WHITE);
+        Piece queen = new Piece(3, PieceType.QUEEN, Color.BLACK);
+
+        chessboard.getSquareAt(0, 3).occupyWith(king);
+        chessboard.getSquareAt(3, 4).occupyWith(rook);
+        chessboard.getSquareAt(3, 6).occupyWith(queen);
+
+        assertEquals(1, calculator.getCheckingPieces(king).size());
+        assertEquals(2, calculator.computePossibleTargets(rook).size());
+        assertEquals(4, calculator.computePossibleTargets(king).size());
+
+        Piece pawn = new Piece(4, PieceType.PAWN, Color.WHITE);
+        chessboard.getSquareAt(0, 4).occupyWith(pawn);
+
+        assertEquals(1, calculator.computePossibleTargets(pawn).size());
+
+        chessboard.getSquareFor(queen).free();
+
+        assertEquals(0, calculator.getCheckingPieces(king).size());
+        assertEquals(2, calculator.computePossibleTargets(pawn).size());
+        assertEquals(13, calculator.computePossibleTargets(rook).size());
+        assertEquals(4, calculator.computePossibleTargets(king).size());
+    }
 }

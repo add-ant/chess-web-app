@@ -31,6 +31,11 @@ public class Move {
         return piece;
     }
 
+    public void perform(){
+        target.occupyWith(piece);
+        origin.free();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

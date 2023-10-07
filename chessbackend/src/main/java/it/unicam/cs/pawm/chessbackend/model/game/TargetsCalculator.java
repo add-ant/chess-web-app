@@ -14,6 +14,10 @@ public class TargetsCalculator {
         this.chessboard = chessboard;
     }
 
+    public Chessboard getChessboard() {
+        return chessboard;
+    }
+
     public Set<Square> defendedSquares(Piece piece){
         Square origin = chessboard.getSquareFor(piece);
         return switch (piece.getPieceType()){
@@ -127,8 +131,28 @@ public class TargetsCalculator {
      */
     public Set<Square> computePossibleTargets(Piece piece) {
         Square origin = chessboard.getSquareFor(piece);
+
         if (isPinned(piece))
             return Collections.emptySet();
+
+        if (!piece.getPieceType().equals(PieceType.KING)){
+            Piece king;
+            if(chessboard.getPiece(PieceType.KING, piece.getColor()).isPresent()){
+                king = chessboard.getPiece(PieceType.KING, piece.getColor()).get();
+                if (!getCheckingPieces(Objects.requireNonNull(king)).isEmpty()){
+                    return targetsIfCheck(piece, origin, king);
+                } else {
+                    return switch (piece.getPieceType()) {
+                        case PAWN -> computePawnTargets(piece, origin);
+                        case ROOK -> computeRookTargets(piece, origin);
+                        case BISHOP -> computeBishopTargets(piece, origin);
+                        case KNIGHT -> computeKnightTargets(piece, origin);
+                        case QUEEN -> computeQueenTargets(piece, origin);
+                        case KING -> computeKingTargets(piece, origin);
+                    };
+                }
+            }
+        }
 
         return switch (piece.getPieceType()) {
             case PAWN -> computePawnTargets(piece, origin);
@@ -138,6 +162,75 @@ public class TargetsCalculator {
             case QUEEN -> computeQueenTargets(piece, origin);
             case KING -> computeKingTargets(piece, origin);
         };
+    }
+
+    private Set<Square> targetsIfCheck(Piece piece, Square origin, Piece king) {
+        if (getCheckingPieces(Objects.requireNonNull(king)).size() >= 2)
+            return Collections.emptySet();
+        else if (getCheckingPieces(Objects.requireNonNull(king)).size() == 1){
+            Piece checking = getCheckingPieces(king).get(0);
+            Square checkingSquare = chessboard.getSquareFor(checking);
+            Optional<Square> toDefend = defendedSquares(king).stream()
+                .filter(s -> computePossibleTargets(checking).contains(s)).findFirst();
+            return targetsIfCheckOfPiece(piece, origin, toDefend, checkingSquare);
+        }
+        return null;
+    }
+
+    private Set<Square> targetsIfCheckOfPiece(Piece piece, Square origin, Optional<Square> toDefend, Square checkingSquare) {
+        Set<Square> targets = new HashSet<>();
+        if (toDefend.isPresent()){
+            switch (piece.getPieceType()){
+                case PAWN -> {
+                    if (computePawnTargets(piece, origin).contains(toDefend.get()))
+                        targets.add(toDefend.get());
+                    if (computePawnTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }
+                case KNIGHT -> {
+                    if (computeKnightTargets(piece, origin).contains(toDefend.get()))
+                        targets.add(toDefend.get());
+                    if (computeKnightTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case QUEEN -> {
+                    if (computeQueenTargets(piece, origin).contains(toDefend.get()))
+                        targets.add(toDefend.get());
+                    if (computeQueenTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case BISHOP -> {
+                    if (computeBishopTargets(piece, origin).contains(toDefend.get()))
+                        targets.add(toDefend.get());
+                    if (computeBishopTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case ROOK -> {
+                    if (computeRookTargets(piece, origin).contains(toDefend.get()))
+                        targets.add(toDefend.get());
+                    if (computeRookTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }
+            }
+        } else {
+            switch (piece.getPieceType()){
+                case PAWN -> {
+                    if (computePawnTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }
+                case KNIGHT -> {
+                    if (computeKnightTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case QUEEN -> {
+                    if (computeQueenTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case BISHOP -> {
+                    if (computeBishopTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }case ROOK -> {
+                    if (computeRookTargets(piece, origin).contains(checkingSquare))
+                        targets.add(checkingSquare);
+                }
+            }
+        }
+        return targets;
     }
 
     /**
@@ -150,6 +243,53 @@ public class TargetsCalculator {
      */
     public boolean canMove(Piece piece){
         return computePossibleTargets(piece).size() != 0;
+    }
+
+    /**
+     * Tells if the king is checked. If it is checked, a list of the pieces that are checking the king
+     * is returned, otherwise, an empty list is returned.
+     *
+     * @param piece the king.
+     * @return the list of pieces checking the king.
+     */
+    public List<Piece> getCheckingPieces(Piece piece){
+        if (!piece.getPieceType().equals(PieceType.KING))
+            throw new IllegalArgumentException("Only the king could be checked.");
+        Square kingSquare = chessboard.getSquareFor(piece);
+        Set<Square> kingDefended = defendedSquares(piece);
+        List<Piece> checking = new ArrayList<>();
+        Set<Piece> enemies = chessboard.getPiecesOfColor(piece.getColor().swap());
+
+        for (Piece p: enemies) {
+            if (!isPinned(p)){
+                switch (p.getPieceType()){
+                    case PAWN -> {
+                        if (defendedSquares(p).contains(kingSquare))
+                            checking.add(p);
+                    }
+                    case KNIGHT -> {
+                        if (computeKnightTargets(p, chessboard.getSquareFor(p)).contains(kingSquare))
+                            checking.add(p);
+                    }
+                    case BISHOP -> {
+                        if (computeBishopTargets(p, chessboard.getSquareFor(p)).stream()
+                            .filter(kingDefended::contains).anyMatch(Square::isEmpty))
+                            checking.add(p);
+                    }
+                    case ROOK -> {
+                        if (computeRookTargets(p, chessboard.getSquareFor(p)).stream()
+                            .filter(kingDefended::contains).anyMatch(Square::isEmpty))
+                            checking.add(p);
+                    }
+                    case QUEEN -> {
+                        if (computeQueenTargets(p, chessboard.getSquareFor(p)).stream()
+                            .filter(kingDefended::contains).anyMatch(Square::isEmpty))
+                            checking.add(p);
+                    }
+                }
+            }
+        }
+        return checking;
     }
 
     public Set<Piece> getPinnedPiecesBy(Piece piece){
@@ -203,6 +343,7 @@ public class TargetsCalculator {
                 current = chessboard.getSquareFrom(current.get(), direction);
             }
         }
+
         if (pieces.size() >= 2 && pieces.get(1).getPieceType().equals(PieceType.KING))
             return Optional.of(pieces.get(0));
         return Optional.empty();
