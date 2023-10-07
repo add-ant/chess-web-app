@@ -25,9 +25,15 @@ public class Evaluator implements MoveEvaluator{
             .findFirst()
             .orElseThrow();
         if (calculator.computePossibleTargets(pieceToMove).contains(move.getTarget())) {
-            boolean isTargetEmptyBeforeMove = calculator.getChessboard().getSquareAt(move.getTarget().getRow(),
-                move.getTarget().getColumn()).isEmpty();
+            boolean isTargetEmptyBeforeMove = calculator.getChessboard().getSquareAt(
+                move.getTarget().getRow(),
+                move.getTarget().getColumn()
+            ).isEmpty();
+
             calculator.getChessboard().evolve(move);
+
+            if (!pieceToMove.hasMoved())
+                pieceToMove.setMoved();
             if (calculator.getCheckingPieces(enemyKing).contains(pieceToMove)) {
                 if (enemies.stream().noneMatch(calculator::canMove))
                     return MoveEffect.CHECKMATE;
