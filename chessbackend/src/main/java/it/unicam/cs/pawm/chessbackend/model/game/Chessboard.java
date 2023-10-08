@@ -1,6 +1,7 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * This class represents a chessboard. It consists of a set of 64 squares organized in rows and
@@ -35,6 +36,56 @@ public class Chessboard {
 
     public Square[][] getChessboard() {
         return chessboard;
+    }
+
+    public void initializeBoard(Set<Piece> firstSet, Set<Piece> secondSet){
+        if (firstSet.stream().allMatch(p -> p.getColor().equals(Color.WHITE))){
+            if (secondSet.stream().allMatch(p -> p.getColor().equals(Color.BLACK))){
+                initializeTeam(firstSet, Color.WHITE);
+                initializeTeam(secondSet, Color.BLACK);
+            }
+        } else if (secondSet.stream().allMatch(p -> p.getColor().equals(Color.WHITE))){
+            initializeTeam(firstSet, Color.BLACK);
+            initializeTeam(secondSet, Color.WHITE);
+        }
+    }
+
+    private void initializeTeam(Set<Piece> pieceSet, Color color) {
+        int pawnRow = 1;
+        int piecesRow = 0;
+        int pawnCol = 0;
+
+        if (color.equals(Color.BLACK)){
+            pawnRow = 6;
+            piecesRow = 7;
+        }
+
+        for (Piece p :
+            pieceSet) {
+            switch (p.getPieceType()){
+                case PAWN -> chessboard[pawnRow][pawnCol++].occupyWith(p);
+                case ROOK -> {
+                    if (getSquareAt(piecesRow, 0).isEmpty()) {
+                        chessboard[piecesRow][0].occupyWith(p);
+                    } else
+                        chessboard[piecesRow][7].occupyWith(p);
+                }
+                case KNIGHT -> {
+                    if (getSquareAt(piecesRow, 1).isEmpty()) {
+                        chessboard[piecesRow][1].occupyWith(p);
+                    } else
+                        chessboard[piecesRow][6].occupyWith(p);
+                }
+                case BISHOP -> {
+                    if (getSquareAt(piecesRow, 2).isEmpty()) {
+                        chessboard[piecesRow][2].occupyWith(p);
+                    } else
+                        chessboard[piecesRow][5].occupyWith(p);
+                }
+                case QUEEN -> chessboard[piecesRow][3].occupyWith(p);
+                case KING -> chessboard[piecesRow][4].occupyWith(p);
+            }
+        }
     }
 
     public Square getSquareAt(int row, int column){

@@ -1,13 +1,8 @@
 package it.unicam.cs.pawm.chessbackend.model.game.match;
 
-import it.unicam.cs.pawm.chessbackend.model.game.Chessboard;
-import it.unicam.cs.pawm.chessbackend.model.game.Evaluator;
-import it.unicam.cs.pawm.chessbackend.model.game.Move;
+import it.unicam.cs.pawm.chessbackend.model.game.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This class represents a chess match between two players.
@@ -23,17 +18,25 @@ import java.util.Objects;
 public class Match {
     private final Player whitePlayer;
     private final Player blackPlayer;
+    private MatchEndingResult result = null;
+    private Player winner = null;
+    private final Chessboard board;
     private final Map<Player, ChessTimer> timers;
     private final Map<Player, List<Move>> moves;
     private final Evaluator moveEvaluator;
+    private Player currentTurnPlayer;
 
-    public Match(Player whitePlayer, Player blackPlayer, Chessboard board) {
+
+    public Match(Player whitePlayer, Player blackPlayer, Chessboard board, long timerAmount) {
         this.whitePlayer = Objects.requireNonNull(whitePlayer);
         this.blackPlayer = Objects.requireNonNull(blackPlayer);
-        this.moveEvaluator = new Evaluator(Objects.requireNonNull(board));
+        this.board = Objects.requireNonNull(board);
+        this.board.initializeBoard(whitePlayer.getPieces(), blackPlayer.getPieces());
+        this.currentTurnPlayer = whitePlayer;
+        this.moveEvaluator = new Evaluator(this.board);
         this.timers = new HashMap<>();
-        this.timers.put(whitePlayer, new ChessTimer());
-        this.timers.put(blackPlayer, new ChessTimer());
+        this.timers.put(whitePlayer, new ChessTimer(timerAmount));
+        this.timers.put(blackPlayer, new ChessTimer(timerAmount));
         this.moves = new HashMap<>();
     }
 
@@ -55,5 +58,48 @@ public class Match {
 
     public Evaluator getMoveEvaluator() {
         return moveEvaluator;
+    }
+
+    public void start(){
+        timers.get(currentTurnPlayer).start();
+    }
+
+    public void switchTurn(){
+        timers.get(currentTurnPlayer).pause();
+        if (currentTurnPlayer.getTeam().equals(Color.WHITE)){
+            currentTurnPlayer = blackPlayer;
+            timers.get(currentTurnPlayer).start();
+        } else {
+            currentTurnPlayer = whitePlayer;
+            timers.get(currentTurnPlayer).start();
+        }
+    }
+
+    public void handleMove(Move move){
+        if (!move.getPiece().getColor().equals(currentTurnPlayer.getTeam()))
+            throw new IllegalArgumentException("Cannot move other player pieces");
+        MoveEffect effect = moveEvaluator.evaluate(move);
+        if (!effect.equals(MoveEffect.ILLEGAL)){
+            if (effect.equals(MoveEffect.CHECKMATE)){
+                winner = currentTurnPlayer;
+                result = MatchEndingResult.CHECKMATE_END;
+            } else if (effect.equals(MoveEffect.DRAW)){
+                result = MatchEndingResult.DRAW;
+            } else {
+                switchTurn();
+            }
+        }
+    }
+
+    public Optional<MatchEndingResult> getEnding() {
+        if (result == null)
+            return Optional.empty();
+        return Optional.of(result);
+    }
+
+    public Optional<Player> getWinner(){
+        if (winner == null)
+            return Optional.empty();
+        return Optional.of(winner);
     }
 }

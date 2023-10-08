@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ChessboardTest {
@@ -75,5 +77,29 @@ public class ChessboardTest {
         assertFalse(chessboard.getSquareFrom(origin, Direction.UP, Direction.LEFT, 2, 1).isPresent());
 
         System.out.println(chessboard.getSquareFrom(origin, Direction.UP, Direction.RIGTH, 2, 1));
+    }
+
+    @Test
+    public void boardShouldBeCorrectlyInitialized(){
+        Set<Piece> whitePieces = PieceFactory.getSet(Color.WHITE);
+        Set<Piece> blackPieces = PieceFactory.getSet(Color.BLACK);
+
+        chessboard.initializeBoard(whitePieces, blackPieces);
+
+        for (int i = 0; i < 8; i++){
+            assertTrue(chessboard.getSquareAt(1, i).getPiece().isPresent());
+            assertTrue(chessboard.getSquareAt(6, i).getPiece().isPresent());
+            assertEquals(PieceType.PAWN, chessboard.getSquareAt(1, i).getPiece().get().getPieceType());
+            assertEquals(PieceType.PAWN, chessboard.getSquareAt(6, i).getPiece().get().getPieceType());
+            assertEquals(Color.WHITE, chessboard.getSquareAt(1, i).getPiece().get().getColor());
+            assertEquals(Color.BLACK, chessboard.getSquareAt(6, i).getPiece().get().getColor());
+        }
+
+        for (int i = 0; i < 8; i++){
+            assertTrue(chessboard.getSquareAt(0, i).getPiece().isPresent());
+            assertTrue(chessboard.getSquareAt(7, i).getPiece().isPresent());
+            assertEquals(Color.WHITE, chessboard.getSquareAt(0, i).getPiece().get().getColor());
+            assertEquals(Color.BLACK, chessboard.getSquareAt(7, i).getPiece().get().getColor());
+        }
     }
 }
