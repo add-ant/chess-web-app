@@ -16,44 +16,41 @@ import java.util.*;
  *      - End time: if a player ends his time to make moves, the other player wins.
  */
 public class Match {
-    private final Player whitePlayer;
-    private final Player blackPlayer;
-    private MatchEndingResult result = null;
-    private Player winner = null;
-    private final Chessboard board;
-    private final Map<Player, ChessTimer> timers;
-    private final Map<Player, List<Move>> moves;
+    private final PlayerPair players;
+    private MoveEffect lastMoveEffect;
+    private final ChessClock clock;
+    private final MatchHistory history;
     private final Evaluator moveEvaluator;
-    private Player currentTurnPlayer;
 
-
-    public Match(Player whitePlayer, Player blackPlayer, Chessboard board, long timerAmount) {
-        this.whitePlayer = Objects.requireNonNull(whitePlayer);
-        this.blackPlayer = Objects.requireNonNull(blackPlayer);
-        this.board = Objects.requireNonNull(board);
-        this.board.initializeBoard(whitePlayer.getPieces(), blackPlayer.getPieces());
-        this.currentTurnPlayer = whitePlayer;
-        this.moveEvaluator = new Evaluator(this.board);
-        this.timers = new HashMap<>();
-        this.timers.put(whitePlayer, new ChessTimer(timerAmount));
-        this.timers.put(blackPlayer, new ChessTimer(timerAmount));
-        this.moves = new HashMap<>();
+    public Match(Chessboard board, long timerAmount, PlayerPair players) {
+        this.players = players;
+        this.moveEvaluator = new Evaluator(board);
+        this.moveEvaluator.getCalculator().getChessboard().initializeBoard(
+            players.getWhitePlayer().getPieces(),
+            players.getBlackPlayer().getPieces()
+        );
+        this.clock = new ChessClock(players, timerAmount);
+        this.history = new MatchHistory(players);
     }
 
     public Player getWhitePlayer() {
-        return whitePlayer;
+        return players.getWhitePlayer();
     }
 
     public Player getBlackPlayer() {
-        return blackPlayer;
+        return players.getBlackPlayer();
     }
 
-    public Map<Player, ChessTimer> getTimers() {
-        return timers;
+    public PlayerPair getPlayers() {
+        return players;
     }
 
-    public Map<Player, List<Move>> getMoves() {
-        return moves;
+    public ChessClock getClock() {
+        return clock;
+    }
+
+    public MatchHistory getHistory() {
+        return history;
     }
 
     public Evaluator getMoveEvaluator() {
@@ -61,45 +58,57 @@ public class Match {
     }
 
     public void start(){
-        timers.get(currentTurnPlayer).start();
+        clock.startFor(players.getWhitePlayer());
     }
 
     public void switchTurn(){
-        timers.get(currentTurnPlayer).pause();
-        if (currentTurnPlayer.getTeam().equals(Color.WHITE)){
-            currentTurnPlayer = blackPlayer;
-            timers.get(currentTurnPlayer).start();
-        } else {
-            currentTurnPlayer = whitePlayer;
-            timers.get(currentTurnPlayer).start();
-        }
+        clock.switchPlayer();
     }
 
-    public void handleMove(Move move){
-        if (!move.getPiece().getColor().equals(currentTurnPlayer.getTeam()))
+    public void onMove(Move move){
+        if (isEnded())
+            throw new IllegalStateException("Match ended: cannot perform any more moves");
+
+        if (!move.getPiece().getColor().equals(clock.getCurrentlyPlaying().getTeam()))
             throw new IllegalArgumentException("Cannot move other player pieces");
-        MoveEffect effect = moveEvaluator.evaluate(move);
-        if (!effect.equals(MoveEffect.ILLEGAL)){
-            if (effect.equals(MoveEffect.CHECKMATE)){
-                winner = currentTurnPlayer;
-                result = MatchEndingResult.CHECKMATE_END;
-            } else if (effect.equals(MoveEffect.DRAW)){
-                result = MatchEndingResult.DRAW;
+
+        lastMoveEffect = moveEvaluator.evaluate(move);
+
+        if (!lastMoveEffect.equals(MoveEffect.ILLEGAL)){
+            history.add(move);
+            if (lastMoveEffect.equals(MoveEffect.CHECKMATE) || lastMoveEffect.equals(MoveEffect.DRAW)){
+                clock.stop();
             } else {
                 switchTurn();
             }
         }
     }
 
+    public boolean isEnded(){
+        return getEnding().isPresent();
+    }
+
     public Optional<MatchEndingResult> getEnding() {
-        if (result == null)
-            return Optional.empty();
-        return Optional.of(result);
+        if (!clock.isStopped() && clock.getPlayerWithoutTime().isPresent())
+            return Optional.of(MatchEndingResult.TIME);
+        if (!(lastMoveEffect == null)){
+            if (lastMoveEffect.equals(MoveEffect.CHECKMATE))
+                return Optional.of(MatchEndingResult.CHECKMATE_END);
+            if (lastMoveEffect.equals(MoveEffect.DRAW))
+                return Optional.of(MatchEndingResult.DRAW);
+        }
+        return Optional.empty();
     }
 
     public Optional<Player> getWinner(){
-        if (winner == null)
-            return Optional.empty();
-        return Optional.of(winner);
+        if (getEnding().isPresent()){
+            if (getEnding().get().equals(MatchEndingResult.TIME))
+                return clock.getPlayerTimers().keySet().stream()
+                        .filter(p -> !p.equals(clock.getPlayerWithoutTime().orElseThrow()))
+                            .findFirst();
+            else if (getEnding().get().equals(MatchEndingResult.CHECKMATE_END))
+                return Optional.of(clock.getPreviousTurnPlayer());
+        }
+        return Optional.empty();
     }
 }

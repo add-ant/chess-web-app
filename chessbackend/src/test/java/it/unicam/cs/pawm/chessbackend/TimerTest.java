@@ -1,6 +1,6 @@
 package it.unicam.cs.pawm.chessbackend;
 
-import it.unicam.cs.pawm.chessbackend.model.game.match.ChessTimer;
+import it.unicam.cs.pawm.chessbackend.model.game.match.SimpleTimer;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,25 +8,25 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TimerTest {
     @Test
     public void timerShouldStartAndPause(){
-        ChessTimer chessTimer = new ChessTimer(60000);
+        SimpleTimer simpleTimer = new SimpleTimer(60000);
 
-        chessTimer.start();
+        simpleTimer.start();
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        chessTimer.pause();
-        assertTrue(chessTimer.isPaused());
-        assertFalse(chessTimer.isDone());
-        assertEquals(50000, chessTimer.getTimeLeft());
+        simpleTimer.pause();
+        assertTrue(simpleTimer.isPaused());
+        assertFalse(simpleTimer.isDone());
+        assertEquals(50000, simpleTimer.getTimeLeft());
     }
 
     @Test
     public void timerShouldExpire(){
-        ChessTimer chessTimer = new ChessTimer(15000);
+        SimpleTimer simpleTimer = new SimpleTimer(15000);
 
-        chessTimer.start();
+        simpleTimer.start();
 
         try {
             Thread.sleep(15000);
@@ -34,8 +34,8 @@ public class TimerTest {
             throw new RuntimeException(e);
         }
 
-        assertTrue(chessTimer.isDone());
-        assertEquals(0, chessTimer.getTimeLeft());
-        assertThrows(IllegalStateException.class, chessTimer::start);
+        assertTrue(simpleTimer.isDone());
+        assertEquals(0, simpleTimer.getTimeLeft());
+        assertThrows(IllegalStateException.class, simpleTimer::start);
     }
 }

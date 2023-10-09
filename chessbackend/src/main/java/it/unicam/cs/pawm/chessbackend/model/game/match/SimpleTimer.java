@@ -11,14 +11,14 @@ import java.util.TimerTask;
  *
  * If a timer ends, the player associated to that timer lost the game because of time.
  */
-public class ChessTimer {
+public class SimpleTimer {
     private long timeLeft;
 
     private boolean paused;
 
     private final Timer timer;
 
-    public ChessTimer(long timeLeft) {
+    public SimpleTimer(long timeLeft) {
         this.timeLeft = timeLeft;
         this.timer = new Timer();
         this.paused = true;
@@ -59,6 +59,10 @@ public class ChessTimer {
 
     public void pause(){
         paused = true;
+    }
+
+    public void stop(){
+        timeLeft = 0;
     }
 
 
