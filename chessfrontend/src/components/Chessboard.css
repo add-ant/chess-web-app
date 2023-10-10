@@ -1,0 +1,14 @@
+.board{
+    display: grid;
+    grid-template-columns: calc(.25*100px) calc(8*100px);
+}
+
+.board-grid{
+    display: grid;
+    grid-template-columns: repeat(8, 100px);
+    grid-template-rows: repeat(8, 100px);
+    width: 800px;
+    height: 800px;
+    background-color: white;
+}
+
