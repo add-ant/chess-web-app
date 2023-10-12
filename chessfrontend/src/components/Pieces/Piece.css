@@ -1,0 +1,19 @@
+.piece {
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    transform: translate(0, 0);
+}
+
+.piece.bk {background-image: url('../../assets/images/bk.png');}
+.piece.bq {background-image: url('../../assets/images/bq.png');}
+.piece.br {background-image: url('../../assets/images/br.png');}
+.piece.bb {background-image: url('../../assets/images/bb.png');}
+.piece.bn {background-image: url('../../assets/images/bn.png');}
+.piece.bp {background-image: url('../../assets/images/bp.png');}
+.piece.wk {background-image: url('../../assets/images/wk.png');}
+.piece.wq {background-image: url('../../assets/images/wq.png');}
+.piece.wr {background-image: url('../../assets/images/wr.png');}
+.piece.wb {background-image: url('../../assets/images/wb.png');}
+.piece.wn {background-image: url('../../assets/images/wn.png');}
+.piece.wp {background-image: url('../../assets/images/wp.png');}

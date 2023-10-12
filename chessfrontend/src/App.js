@@ -1,15 +1,15 @@
 import './App.css';
-import Chessboard from './components/Chessboard';
+import Chessboard from './components/Board/Chessboard';
+
 function App() {
-  
   return (
-    <div className="App">
-      <Chessboard />
+    <div>
+      <div className="App">
+        <Chessboard />
+      </div>
     </div>
   );
 }
-
-
 
 
 export default App;
