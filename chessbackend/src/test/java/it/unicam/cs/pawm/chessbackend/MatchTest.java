@@ -24,7 +24,7 @@ public class MatchTest {
         Player white = new Player(Color.WHITE, "ant", 600);
         Player black = new Player(Color.BLACK, "ben", 700);
         PlayerPair players = new PlayerPair(white, black);
-        match = new Match(board, 60000, players);
+        match = new Match(0, 60000, players);
     }
 
     @Test

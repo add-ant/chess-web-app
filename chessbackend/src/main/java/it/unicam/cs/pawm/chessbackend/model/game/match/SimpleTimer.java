@@ -40,10 +40,13 @@ public class SimpleTimer {
         TimerTask decreaseOneSec = new TimerTask() {
             @Override
             public void run() {
-                if (getTimeLeft() >= 1000 && !isPaused() && !isDone())
+                if (getTimeLeft() >= 1000 && !isDone())
                     setTimeLeft(timeLeft -= 1000);
-                else
+                else if (isPaused()){
+
+                } else {
                     timer.cancel();
+                }
             }
         };
         timer.schedule(decreaseOneSec, 0,  1000);

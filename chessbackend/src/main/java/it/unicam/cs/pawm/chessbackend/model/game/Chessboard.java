@@ -1,7 +1,8 @@
 package it.unicam.cs.pawm.chessbackend.model.game;
 
+import org.springframework.context.annotation.Bean;
+
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * This class represents a chessboard. It consists of a set of 64 squares organized in rows and

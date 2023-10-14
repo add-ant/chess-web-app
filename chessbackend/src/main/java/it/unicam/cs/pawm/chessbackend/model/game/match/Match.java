@@ -16,21 +16,31 @@ import java.util.*;
  *      - End time: if a player ends his time to make moves, the other player wins.
  */
 public class Match {
+    private final int id;
     private final PlayerPair players;
     private MoveEffect lastMoveEffect;
     private final ChessClock clock;
     private final MatchHistory history;
     private final Evaluator moveEvaluator;
 
-    public Match(Chessboard board, long timerAmount, PlayerPair players) {
+    public Match(int id, long timerAmount, PlayerPair players) {
+        this.id = id;
         this.players = players;
-        this.moveEvaluator = new Evaluator(board);
+        this.moveEvaluator = new Evaluator(new Chessboard());
         this.moveEvaluator.getCalculator().getChessboard().initializeBoard(
             players.getWhitePlayer().getPieces(),
             players.getBlackPlayer().getPieces()
         );
         this.clock = new ChessClock(players, timerAmount);
         this.history = new MatchHistory(players);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public MoveEffect getLastMoveEffect() {
+        return lastMoveEffect;
     }
 
     public Player getWhitePlayer() {
