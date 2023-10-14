@@ -37,13 +37,29 @@ export default function Piece(props) {
     default:
   }
 
-  const onDragStart = e => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', `${props.type},${props.color},${props.currentRow},${props.currentColumn}`)
-    setTimeout(() => {
-        e.target.style.display = 'none';
-    },0)
-  }
+  const onDragEnd = (e) => {
+    console.log(e); //TODO implement the display block for a piece dragged outside the board
+  };
 
-  return <div className={pieceClass} draggable={true} onDragStart={onDragStart}></div>;
+  const onDragStart = (e) => {
+    e.dataTransfer.effectAllowed = "move";
+    console.log(e.target);
+    e.dataTransfer.setData(
+      "text/plain",
+      `${props.type},${props.color},${props.currentRow},${props.currentColumn},${props.id}`
+    );
+    setTimeout(() => {
+      e.target.style.display = "none";
+    }, 0);
+  };
+
+  return (
+    <div
+      className={pieceClass}
+      id={props.id}
+      draggable={true}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+    ></div>
+  );
 }

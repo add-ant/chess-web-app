@@ -10,6 +10,7 @@ export default function Tile(props) {
       <Piece
         type={props.piece.pieceType}
         color={props.piece.color}
+        id={props.piece.id}
         currentRow={props.row}
         currentColumn={props.column}
       />
@@ -23,16 +24,39 @@ export default function Tile(props) {
   };
 
   const onDrop = (e) => {
-    const [type, color] = e.dataTransfer.getData("text").split(",");
-    console.log(type, color);
-    setPiece(
-      <Piece
-        type={type}
-        color={color}
-        currentRow={props.row}
-        currentColumn={props.column}
-      />
-    );
+    const [type, color, originRow, originColumn, id] = e.dataTransfer
+      .getData("text")
+      .split(",");
+    const sourceTarget = document.getElementById(id);
+    console.log(sourceTarget);
+    console.log(e);
+
+    const fetchFun = () => {
+      fetch(
+        `http://localhost:8080/match/moves?ox=${originRow}&oy=${originColumn}&tx=${props.row}&ty=${props.column}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.type !== "ILLEGAL") {
+            setPiece(
+              <Piece
+                type={type}
+                color={color}
+                id={id}
+                currentRow={props.row}
+                currentColumn={props.column}
+              />
+            );
+          } else {
+            sourceTarget.style.display = "block";
+          }
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    };
+
+    fetchFun();
   };
 
   const onDragOver = (e) => e.preventDefault();
